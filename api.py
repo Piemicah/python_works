@@ -3,17 +3,19 @@ from datetime import datetime, timezone
 
 headers = {"content-type": "application/json"}
 
+baseUrl = "http://127.0.0.1:8000"  # "https://173.225.101.183"  #
+
 
 def validate_and_register_key(key, account):
 
     # check if the key exist and unused
-    keys = getKeys()["keys"]
+    keys = getKeys()
     for k in keys:
-        if key == k["key"] and k["account"] == None:
+        if key == k["activation_key"] and k["account"] == None:
             # assign key
             return activateKey(key, account)
 
-        if key == k["key"] and k["account"] != None:
+        if key == k["activation_key"] and k["account"] != None:
             # has been asigned
             return f"key has been assigned to account: {k['account']}"
 
@@ -24,7 +26,7 @@ def validate_and_register_key(key, account):
 def check_existing_key(account):
     # load keys
     account = str(account)
-    keys = getKeys()["keys"]
+    keys = getKeys()
     for k in keys:
         if account == k["account"] and is_active(k):
             # active
@@ -38,7 +40,8 @@ def check_existing_key(account):
 
 
 def getKeys():
-    url = "http://127.0.0.1:5000/api/keys"
+    # url = "http://127.0.0.1:5000/api/keys"
+    url = f"{baseUrl}/api/keys/"
 
     response = requests.get(url)
     data = json.loads(response.content.decode("utf-8"))
@@ -46,10 +49,11 @@ def getKeys():
 
 
 def activateKey(key, account):
-    url = f"http://127.0.0.1:5000/api/update/{key}"
+    # url = f"http://127.0.0.1:5000/api/update/{key}"
+    url = f"{baseUrl}/api/update/{key}/"
 
     date = datetime.now(timezone.utc).isoformat()
-    payload = {"account": account, "date": date}
+    payload = {"account": account, "created": date}
     response = requests.put(url, data=json.dumps(payload), headers=headers)
     data = json.loads(response.content.decode("utf-8"))
     return data
@@ -66,5 +70,5 @@ def is_active(key):
 
 
 # msg = check_existing_key(19106117)
-msg = validate_and_register_key("0b0804e8-425f-47ec-aab3-fa1d85701e59", 787867)
-print(msg)
+# msg = validate_and_register_key("0b0804e8-425f-47ec-aab3-fa1d85701e59", 787867)
+# print(msg)
